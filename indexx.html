@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>노인 기억력 저하 체험 교육 — 사회복무요원용</title>
+<meta name="theme-color" content="#1a1a1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="기억력체험">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:#f5f5f5;color:#1a1a1a;min-height:100vh;}
+.app{max-width:600px;margin:0 auto;padding:1.5rem 1rem;}
+.screen{display:none;}.screen.active{display:block;}
+.progress-bar{display:flex;gap:5px;margin-bottom:1.5rem;}
+.dot{height:4px;flex:1;border-radius:2px;background:#ddd;}
+.dot.active{background:#1a1a1a;}.dot.done{background:#888;}
+.badge{display:inline-block;font-size:12px;padding:4px 12px;border-radius:20px;font-weight:500;margin-bottom:.75rem;}
+.badge-intro{background:#e8f0fe;color:#1a56db;}
+.badge-warn{background:#fff3cd;color:#92640d;}
+.badge-info{background:#e1f5ee;color:#0a6640;}
+.badge-done{background:#d4edda;color:#155724;}
+.badge-purple{background:#f3e8ff;color:#7c3aed;}
+h1{font-size:24px;font-weight:700;line-height:1.3;margin-bottom:.75rem;}
+h2{font-size:19px;font-weight:700;margin-bottom:.75rem;}
+h3{font-size:15px;font-weight:600;margin-bottom:.4rem;}
+p{font-size:14px;line-height:1.7;color:#444;}
+.card{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:1rem 1.25rem;margin-bottom:.75rem;}
+.card-warn{border-left:4px solid #f0ad4e;border-radius:0 12px 12px 0;}
+.card-info{border-left:4px solid #28a745;border-radius:0 12px 12px 0;}
+.card-link{border-left:4px solid #7c3aed;border-radius:0 12px 12px 0;display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;}
+.btn{padding:11px 22px;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;border:1px solid #ccc;background:#fff;color:#1a1a1a;transition:background .15s;text-decoration:none;display:inline-block;}
+.btn:hover{background:#f0f0f0;}
+.btn.primary{background:#1a1a1a;color:#fff;border-color:transparent;}
+.btn.primary:hover{opacity:.85;}
+.btn.full{width:100%;margin-top:.75rem;text-align:center;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-row{display:flex;gap:10px;margin-top:1.25rem;}
+/* 레벨 선택 */
+.level-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:1rem 0;}
+.level-card{background:#fff;border:2px solid #e8e8e8;border-radius:12px;padding:1rem .75rem;text-align:center;cursor:pointer;transition:all .15s;}
+.level-card:hover{border-color:#888;}
+.level-card.sel-1{border-color:#22c55e;background:#f0fdf4;}
+.level-card.sel-2{border-color:#f59e0b;background:#fffbeb;}
+.level-card.sel-3{border-color:#ef4444;background:#fef2f2;}
+.level-icon{font-size:26px;margin-bottom:6px;}
+.level-name{font-size:13px;font-weight:700;margin-bottom:4px;}
+.level-desc{font-size:11px;color:#888;line-height:1.4;}
+/* 암기 목록 */
+.memo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1rem 0;}
+.memo-item{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.9rem;text-align:center;font-size:15px;font-weight:600;}
+.memo-item .mi-icon{font-size:26px;margin-bottom:4px;display:block;}
+/* 타이머 */
+.timer-box{text-align:center;margin:1rem 0;}
+.timer-num{font-size:44px;font-weight:800;color:#1a56db;line-height:1;}
+.timer-lbl{font-size:12px;color:#888;margin-top:4px;}
+.timer-track{height:6px;border-radius:3px;background:#eee;overflow:hidden;margin-top:.75rem;}
+.timer-fill{height:100%;background:#1a56db;transition:width 1s linear;}
+/* 방해 과제 */
+.distract-box{background:#fff;border:2px solid #e8e8e8;border-radius:14px;padding:1.5rem 1rem;text-align:center;margin:1rem 0;}
+.distract-q{font-size:28px;font-weight:800;margin-bottom:1rem;}
+.distract-input{font-size:22px;text-align:center;width:100%;padding:.6rem;border-radius:8px;border:2px solid #ddd;margin-bottom:.75rem;}
+.distract-input:focus{outline:none;border-color:#1a56db;}
+/* 회상 입력 */
+.recall-input{width:100%;min-height:110px;border:2px solid #ddd;border-radius:10px;padding:.75rem;font-size:15px;font-family:inherit;resize:vertical;margin-bottom:.5rem;}
+.recall-input:focus{outline:none;border-color:#1a56db;}
+/* 통계 */
+.stat-row{display:flex;gap:8px;margin:.75rem 0;}
+.stat-card{flex:1;background:#f5f5f5;border-radius:8px;padding:.6rem;text-align:center;}
+.stat-val{font-size:20px;font-weight:700;color:#1a1a1a;}
+.stat-lbl{font-size:11px;color:#888;margin-top:2px;}
+/* 피드백 */
+.feedback{padding:10px 14px;border-radius:8px;font-size:13px;font-weight:500;text-align:center;margin-bottom:.75rem;}
+/* 비교 */
+.compare-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:.75rem 0;}
+.compare-card{background:#fff;border:1px solid #e8e8e8;border-radius:10px;padding:.9rem;text-align:center;}
+.compare-title{font-size:12px;font-weight:700;color:#888;margin-bottom:8px;}
+.compare-score{font-size:30px;font-weight:800;}
+.compare-sub{font-size:11px;color:#999;margin-top:4px;}
+/* 결과 항목 태그 */
+.recall-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:.5rem;}
+.rtag{font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid #ddd;}
+.rtag.hit{background:#d4edda;border-color:#28a745;color:#155724;}
+.rtag.miss{background:#f8d7da;border-color:#dc3545;color:#721c24;}
+/* 질문 */
+.question-list{list-style:none;padding:0;}
+.question-list li{padding:10px 0;border-bottom:1px solid #eee;font-size:14px;color:#444;display:flex;gap:10px;align-items:flex-start;}
+.question-list li:last-child{border-bottom:none;}
+.q-num{background:#1a1a1a;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;}
+/* 지원방법 */
+.support-list{list-style:none;padding:0;}
+.support-list li{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #eee;font-size:14px;color:#444;line-height:1.6;align-items:flex-start;}
+.support-list li:last-child{border-bottom:none;}
+.sup-icon{color:#7c3aed;flex-shrink:0;margin-top:2px;font-size:15px;}
+/* 인트로 심볼 */
+.sym-grid{display:grid;grid-template-columns:1fr;gap:12px;margin:1.25rem 0;}
+.sym-card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1rem;text-align:center;}
+.sym-icon{font-size:30px;margin-bottom:6px;}
+/* 진행 단계 표시 */
+.step-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;}
+.step-pill{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid #e0e0e0;color:#888;background:#fff;}
+.step-pill.current{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
+.step-pill.completed{background:#f0f9f0;color:#28a745;border-color:#b7dbb7;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- S0: 인트로 -->
+<div class="screen active" id="s0">
+<div class="progress-bar"><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-intro">사회복무요원 교육 프로그램</span>
+<h1>노인 기억력 저하<br>체험 교육</h1>
+<p style="margin-bottom:1rem;">어르신들이 겪는 단기 기억력 저하를 직접 체험하고, 더 따뜻한 돌봄을 제공하기 위한 교육입니다.</p>
+<div class="sym-grid">
+<div class="sym-card"><div class="sym-icon">🧠</div><h3>기억력 저하 체험</h3><p style="font-size:12px;">목록 암기 · 방해 과제 · 회상 테스트</p></div>
+</div>
+<p style="font-size:12px;color:#888;margin-bottom:1.25rem;">소요시간 약 8~10분 | 정상 조건 1회 + 저하 3단계 중 선택 체험</p>
+<button class="btn primary full" onclick="goTo(1)">교육 시작하기 →</button>
+</div>
+
+<!-- S1: 정상 조건 안내 -->
+<div class="screen" id="s1">
+<div class="progress-bar"><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<div class="step-pills">
+<span class="step-pill completed">시작</span>
+<span class="step-pill current">① 평소 기억력</span>
+<span class="step-pill">② 저하 설정</span>
+<span class="step-pill">③ 저하 체험</span>
+<span class="step-pill">④ 결과 비교</span>
+<span class="step-pill">⑤ 성찰</span>
+</div>
+<span class="badge badge-warn">STEP 1 — 평소 상태 체험</span>
+<h2>물건 목록 외우기</h2>
+<p style="margin-bottom:.75rem;">아래 6개 항목을 <strong>20초 동안</strong> 집중해서 외워보세요. 시간이 끝나면 자동으로 가려집니다.</p>
+<div class="card">
+<p style="font-size:13px;color:#666;">💡 이것이 방해 없이 충분한 시간을 준 &quot;평소&quot; 조건입니다. 다음 단계에서 저하 조건과 비교합니다.</p>
+</div>
+<button class="btn primary full" onclick="startMemorize('normal')">암기 시작하기 →</button>
+</div>
+
+<!-- S2: 정상 암기 화면 -->
+<div class="screen" id="s2">
+<div class="progress-bar"><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn">STEP 1 — 암기 중</span>
+<h2>아래 목록을 외우세요</h2>
+<div class="memo-grid" id="memo-grid-normal"></div>
+<div class="timer-box">
+<div class="timer-num" id="memo-timer-normal">20</div>
+<div class="timer-lbl">초 남음</div>
+<div class="timer-track"><div class="timer-fill" id="memo-fill-normal" style="width:100%;"></div></div>
+</div>
+</div>
+
+<!-- S3: 정상 방해과제 -->
+<div class="screen" id="s3">
+<div class="progress-bar"><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn">STEP 1 — 잠깐! 다른 문제부터</span>
+<h2>암산 문제를 풀어주세요</h2>
+<p style="margin-bottom:.5rem;">방금 외운 것은 잠시 잊고, 아래 덧셈 문제 <strong>3개</strong>를 풀어보세요. (실생활에서 다른 일에 신경 쓰다 보면 기억이 흐려지는 상황을 재현합니다)</p>
+<div class="distract-box">
+<div class="distract-q" id="distract-q-normal">? + ?</div>
+<input type="number" class="distract-input" id="distract-input-normal" placeholder="정답 입력">
+<button class="btn primary full" onclick="submitDistract('normal')">제출 →</button>
+</div>
+<div class="stat-row">
+<div class="stat-card"><div class="stat-val" id="dq-normal-count">0 / 3</div><div class="stat-lbl">진행</div></div>
+<div class="stat-card"><div class="stat-val" id="dq-normal-correct">0</div><div class="stat-lbl">정답</div></div>
+</div>
+</div>
+
+<!-- S4: 정상 회상 -->
+<div class="screen" id="s4">
+<div class="progress-bar"><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn">STEP 1 — 회상 테스트</span>
+<h2>기억나는 항목을 모두 적어보세요</h2>
+<p style="margin-bottom:.5rem;">아까 외운 6개 항목 중 기억나는 것을 자유롭게 입력하세요. (쉼표로 구분)</p>
+<textarea class="recall-input" id="recall-normal" placeholder="예: 우산, 지갑, ..."></textarea>
+<button class="btn primary full" onclick="submitRecall('normal')">회상 완료 →</button>
+</div>
+
+<!-- S5: 저하 단계 선택 -->
+<div class="screen" id="s5">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<div class="step-pills">
+<span class="step-pill completed">시작</span>
+<span class="step-pill completed">① 평소 기억력</span>
+<span class="step-pill current">② 저하 설정</span>
+<span class="step-pill">③ 저하 체험</span>
+<span class="step-pill">④ 결과 비교</span>
+<span class="step-pill">⑤ 성찰</span>
+</div>
+<span class="badge badge-warn">STEP 2 — 기억력 저하 단계 선택</span>
+<h2>저하 정도를 선택하세요</h2>
+<p style="margin-bottom:.5rem;">이번엔 항목 수가 늘고, 외우는 시간은 줄고, 방해 과제는 더 어려워집니다.</p>
+<div class="level-cards">
+<div class="level-card" id="lcard-1" onclick="selectLevel(1)">
+<div class="level-icon">🟢</div>
+<div class="level-name" style="color:#16a34a;">경도</div>
+<div class="level-desc">항목 8개<br>암기 12초</div>
+</div>
+<div class="level-card" id="lcard-2" onclick="selectLevel(2)">
+<div class="level-icon">🟡</div>
+<div class="level-name" style="color:#d97706;">중등도</div>
+<div class="level-desc">항목 9개<br>암기 8초</div>
+</div>
+<div class="level-card" id="lcard-3" onclick="selectLevel(3)">
+<div class="level-icon">🔴</div>
+<div class="level-name" style="color:#dc2626;">고도</div>
+<div class="level-desc">항목 10개<br>암기 5초</div>
+</div>
+</div>
+<div class="card" id="level-desc-box" style="display:none;background:#fffbeb;border-color:#fde68a;">
+<p id="level-desc-text" style="font-size:13px;color:#92400e;"></p>
+</div>
+<div class="card" style="background:#fef2f2;border-color:#fca5a5;margin-top:.5rem;">
+<p style="font-size:12px;color:#991b1b;">※ 이 설정은 실제 질환을 진단하거나 동일하게 재현하는 기능이 아니라, 기억력 저하로 인한 어려움을 간접적으로 이해하기 위한 체험 설정입니다.</p>
+</div>
+<div class="btn-row">
+<button class="btn" onclick="goTo(1)">← 처음으로</button>
+<button class="btn primary" id="level-next-btn" onclick="startMemorize('impaired')" disabled style="opacity:.4;flex:1;">이 단계로 체험하기 →</button>
+</div>
+</div>
+
+<!-- S6: 저하 암기 화면 -->
+<div class="screen" id="s6">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn" id="s6-badge">STEP 3 — 암기 중</span>
+<h2>아래 목록을 외우세요</h2>
+<div class="memo-grid" id="memo-grid-impaired"></div>
+<div class="timer-box">
+<div class="timer-num" id="memo-timer-impaired">12</div>
+<div class="timer-lbl">초 남음</div>
+<div class="timer-track"><div class="timer-fill" id="memo-fill-impaired" style="width:100%;"></div></div>
+</div>
+</div>
+
+<!-- S7: 저하 방해과제 -->
+<div class="screen" id="s7">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn" id="s7-badge">STEP 3 — 잠깐! 다른 문제부터</span>
+<h2>암산 문제를 풀어주세요</h2>
+<p style="margin-bottom:.5rem;">이번엔 문제 수가 더 많고 시간 압박도 있습니다. 아래 문제를 <strong id="s7-count-lbl">5개</strong> 풀어보세요.</p>
+<div class="distract-box">
+<div class="distract-q" id="distract-q-impaired">? + ?</div>
+<input type="number" class="distract-input" id="distract-input-impaired" placeholder="정답 입력">
+<button class="btn primary full" onclick="submitDistract('impaired')">제출 →</button>
+</div>
+<div class="stat-row">
+<div class="stat-card"><div class="stat-val" id="dq-impaired-count">0 / 5</div><div class="stat-lbl">진행</div></div>
+<div class="stat-card"><div class="stat-val" id="dq-impaired-correct">0</div><div class="stat-lbl">정답</div></div>
+</div>
+</div>
+
+<!-- S8: 저하 회상 -->
+<div class="screen" id="s8">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-warn" id="s8-badge">STEP 3 — 회상 테스트</span>
+<h2>기억나는 항목을 모두 적어보세요</h2>
+<p style="margin-bottom:.5rem;">아까 외운 항목 중 기억나는 것을 자유롭게 입력하세요. (쉼표로 구분)</p>
+<textarea class="recall-input" id="recall-impaired" placeholder="예: 우산, 지갑, ..."></textarea>
+<button class="btn primary full" onclick="submitRecall('impaired')">회상 완료 →</button>
+</div>
+
+<!-- S9: 결과 비교 -->
+<div class="screen" id="s9">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<div class="step-pills">
+<span class="step-pill completed">시작</span>
+<span class="step-pill completed">① 평소 기억력</span>
+<span class="step-pill completed">② 저하 설정</span>
+<span class="step-pill completed">③ 저하 체험</span>
+<span class="step-pill current">④ 결과 비교</span>
+<span class="step-pill">⑤ 성찰</span>
+</div>
+<span class="badge badge-info">STEP 4 — 결과 비교</span>
+<h2>회상 결과 비교</h2>
+<p style="margin-bottom:.75rem;">평소 조건과 저하 조건에서 기억해 낸 개수를 비교해보세요.</p>
+<div class="compare-wrap">
+<div class="compare-card">
+<div class="compare-title">평소 조건</div>
+<div class="compare-score" id="score-normal" style="color:#16a34a;">0 / 6</div>
+<div class="compare-sub">방해 적음 · 시간 충분</div>
+</div>
+<div class="compare-card">
+<div class="compare-title" id="score-impaired-label">저하 조건</div>
+<div class="compare-score" id="score-impaired" style="color:#dc2626;">0 / 8</div>
+<div class="compare-sub" id="score-impaired-sub">방해 많음 · 시간 부족</div>
+</div>
+</div>
+<div class="card">
+<h3 style="margin-bottom:.4rem;font-size:14px;">평소 조건에서 맞힌 항목</h3>
+<div class="recall-tags" id="tags-normal"></div>
+</div>
+<div class="card">
+<h3 style="margin-bottom:.4rem;font-size:14px;" id="tags-impaired-title">저하 조건에서 맞힌 항목</h3>
+<div class="recall-tags" id="tags-impaired"></div>
+</div>
+<div class="btn-row">
+<button class="btn primary full" onclick="goTo(10)">체험 후 성찰 →</button>
+</div>
+</div>
+
+<!-- S10: 성찰 질문 -->
+<div class="screen" id="s10">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-purple">성찰 질문</span>
+<h2>체험 후 돌아보기</h2>
+<p style="margin-bottom:1rem;">아래 질문들을 스스로 생각해보세요.</p>
+<ul class="question-list">
+<li><div class="q-num">1</div><span>암기 시간이 줄고 방해 과제가 늘었을 때 얼마나 더 어려워졌는가?</span></li>
+<li><div class="q-num">2</div><span>기억나지 않을 때 어떤 기분이 들었는가? (불안, 답답함, 조급함 등)</span></li>
+<li><div class="q-num">3</div><span>중간에 다른 일(암산)을 하면 왜 기억이 더 흐려지는가?</span></li>
+<li><div class="q-num">4</div><span>기억력이 저하된 어르신에게 어떤 방식으로 정보를 전달해야 할까?</span></li>
+</ul>
+<div class="card card-warn" style="margin-top:1rem;">
+<h3 style="margin-bottom:.4rem;">오늘 체험에서 느낀 것</h3>
+<p style="font-size:13px;">기억이 나지 않는 것은 게으르거나 의지가 부족해서가 아닙니다. 짧은 암기 시간과 잦은 방해 속에서, 어르신들은 이런 답답함을 매일 겪고 계십니다.</p>
+</div>
+<div class="btn-row">
+<button class="btn primary full" onclick="goTo(11)">보다 나은 지원 방법 →</button>
+</div>
+</div>
+
+<!-- S11: 지원 방법 -->
+<div class="screen" id="s11">
+<div class="progress-bar"><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot done"></div><div class="dot active"></div><div class="dot"></div><div class="dot"></div></div>
+<span class="badge badge-done">✅ 교육 완료</span>
+<h2>보다 나은 지원 방법</h2>
+<ul class="support-list">
+<li><span class="sup-icon">🔁</span><span><strong>한 번에 하나씩, 반복해서 전달한다.</strong> 여러 정보를 한꺼번에 주지 않습니다.</span></li>
+<li><span class="sup-icon">📝</span><span><strong>말로만 전달하지 않고 메모·달력에 함께 적어드린다.</strong> 시각 정보가 기억을 도와줍니다.</span></li>
+<li><span class="sup-icon">⏳</span><span><strong>충분한 시간을 두고 다시 확인한다.</strong> 재촉하면 오히려 더 잊게 됩니다.</span></li>
+<li><span class="sup-icon">❓</span><span><strong>"기억나세요?" 대신 구체적으로 다시 안내한다.</strong> 시험하듯 묻지 않습니다.</span></li>
+<li><span class="sup-icon">🗓️</span><span><strong>익숙한 루틴과 순서를 유지한다.</strong> 새로운 방식보다 반복된 흐름이 기억에 유리합니다.</span></li>
+<li><span class="sup-icon">🙌</span><span><strong>잊었다고 지적하거나 다그치지 않는다.</strong> 자연스럽게 다시 안내해드리세요.</span></li>
+<li><span class="sup-icon">🔔</span><span><strong>중요한 일정은 알림이나 보호자와 함께 재확인한다.</strong> 혼자 기억에 의존하지 않도록 돕습니다.</span></li>
+</ul>
+<div class="card" style="margin-top:1rem;background:#f5f3ff;border-color:#c4b5fd;text-align:center;">
+<p style="font-size:15px;font-weight:600;color:#5b21b6;margin-bottom:.25rem;">핵심 원칙 3가지</p>
+<p style="font-size:14px;color:#5b21b6;line-height:2.2;">🔁 반복하기 &nbsp;|&nbsp; 📝 기록하기 &nbsp;|&nbsp; 🤝 존중하기</p>
+</div>
+<button class="btn full" style="margin-top:1rem;" onclick="restartAll()">↺ 처음부터 다시 체험하기</button>
+</div>
+
+</div><!-- /app -->
+
+<script>
+/* ===== 전역 상태 ===== */
+var curLevel = 0;
+var ITEMS_NORMAL = [
+{icon:'☂️',name:'우산'},{icon:'👛',name:'지갑'},{icon:'🔑',name:'열쇠'},
+{icon:'📱',name:'휴대폰'},{icon:'💊',name:'약봉지'},{icon:'👓',name:'안경'}
+];
+var ITEM_POOL = [
+{icon:'☂️',name:'우산'},{icon:'👛',name:'지갑'},{icon:'🔑',name:'열쇠'},
+{icon:'📱',name:'휴대폰'},{icon:'💊',name:'약봉지'},{icon:'👓',name:'안경'},
+{icon:'🧣',name:'목도리'},{icon:'🧤',name:'장갑'},{icon:'📔',name:'수첩'},{icon:'🧴',name:'로션'}
+];
+var LEVELS = {
+1:{name:'경도', itemCount:8, memoSec:12, distractCount:4, desc:'경도: 항목이 8개로 늘고, 외우는 시간은 12초로 줄어듭니다. 암산 문제도 4개로 늘어납니다.'},
+2:{name:'중등도', itemCount:9, memoSec:8, distractCount:5, desc:'중등도: 항목 9개, 암기 시간 8초. 암산 문제 난이도와 개수가 늘어 방해가 더 커집니다.'},
+3:{name:'고도', itemCount:10, memoSec:5, distractCount:6, desc:'고도: 항목 10개, 암기 시간은 단 5초. 암산 문제도 6개로 늘어 내용 파악이 매우 어렵습니다.'}
+};
+
+var curItems_normal = ITEMS_NORMAL;
+var curItems_impaired = [];
+var memoTimerID_normal=null, memoTimerID_impaired=null;
+var recallResult = {normal:{score:0,items:[]}, impaired:{score:0,items:[]}};
+
+var distractState = {normal:{idx:0,total:3,correct:0,a:0,b:0}, impaired:{idx:0,total:5,correct:0,a:0,b:0}};
+
+/* ===== 화면 전환 ===== */
+function goTo(n){
+document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+document.getElementById('s'+n).classList.add('active');
+window.scrollTo(0,0);
+if(n===11) markDone();
+}
+function markDone(){
+try{
+localStorage.setItem('edu_memory_done', JSON.stringify({done:true, level:curLevel, ts:Date.now()}));
+}catch(e){}
+}
+
+/* ===== STEP 1: 평소 암기 ===== */
+function shuffle(a){
+var b=a.slice();
+for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}
+return b;
+}
+function renderMemoGrid(gridId, items){
+var g=document.getElementById(gridId);
+g.innerHTML='';
+items.forEach(function(it){
+var d=document.createElement('div');
+d.className='memo-item';
+d.innerHTML='<span class="mi-icon">'+it.icon+'</span>'+it.name;
+g.appendChild(d);
+});
+}
+function startMemorize(mode){
+if(mode==='normal'){
+curItems_normal = shuffle(ITEMS_NORMAL);
+renderMemoGrid('memo-grid-normal', curItems_normal);
+goTo(2);
+runMemoTimer('normal', 20, function(){ goToDistract('normal'); });
+} else {
+var lv=LEVELS[curLevel];
+curItems_impaired = shuffle(ITEM_POOL).slice(0, lv.itemCount);
+document.getElementById('s6-badge').textContent='STEP 3 — '+lv.name+' 조건 암기 중';
+renderMemoGrid('memo-grid-impaired', curItems_impaired);
+goTo(6);
+runMemoTimer('impaired', lv.memoSec, function(){ goToDistract('impaired'); });
+}
+}
+function runMemoTimer(mode, sec, onDone){
+var timerEl=document.getElementById('memo-timer-'+mode);
+var fillEl=document.getElementById('memo-fill-'+mode);
+var total=sec, remain=sec;
+timerEl.textContent=remain;
+fillEl.style.width='100%';
+var timerVar = mode==='normal' ? 'memoTimerID_normal' : 'memoTimerID_impaired';
+if(mode==='normal' && memoTimerID_normal) clearInterval(memoTimerID_normal);
+if(mode==='impaired' && memoTimerID_impaired) clearInterval(memoTimerID_impaired);
+var id=setInterval(function(){
+remain--;
+if(remain<0){
+clearInterval(id);
+onDone();
+return;
+}
+timerEl.textContent=remain;
+fillEl.style.width=(remain/total*100)+'%';
+},1000);
+if(mode==='normal') memoTimerID_normal=id; else memoTimerID_impaired=id;
+}
+
+/* ===== 방해 과제 (암산) ===== */
+function goToDistract(mode){
+var st=distractState[mode];
+st.idx=0; st.correct=0;
+if(mode==='normal'){ st.total=3; document.getElementById('dq-normal-correct').textContent='0'; }
+else{
+var lv=LEVELS[curLevel];
+st.total=lv.distractCount;
+document.getElementById('s7-badge').textContent='STEP 3 — '+lv.name+' 조건 방해 과제';
+document.getElementById('s7-count-lbl').textContent=lv.distractCount+'개';
+document.getElementById('dq-impaired-correct').textContent='0';
+}
+goTo(mode==='normal' ? 3 : 7);
+nextDistractQ(mode);
+}
+function nextDistractQ(mode){
+var st=distractState[mode];
+st.a=Math.floor(Math.random()*40)+10;
+st.b=Math.floor(Math.random()*40)+10;
+document.getElementById('distract-q-'+mode).textContent=st.a+' + '+st.b;
+document.getElementById('distract-input-'+mode).value='';
+document.getElementById('dq-'+mode+'-count').textContent=st.idx+' / '+st.total;
+}
+function submitDistract(mode){
+var st=distractState[mode];
+var input=document.getElementById('distract-input-'+mode);
+var val=parseInt(input.value,10);
+if(val===st.a+st.b) st.correct++;
+st.idx++;
+if(mode==='normal') document.getElementById('dq-normal-correct').textContent=st.correct;
+else document.getElementById('dq-impaired-correct').textContent=st.correct;
+if(st.idx>=st.total){
+document.getElementById('dq-'+mode+'-count').textContent=st.total+' / '+st.total;
+setTimeout(function(){ goToRecall(mode); }, 500);
+} else {
+nextDistractQ(mode);
+}
+}
+
+/* ===== 회상 테스트 ===== */
+function goToRecall(mode){
+if(mode==='impaired'){
+document.getElementById('s8-badge').textContent='STEP 3 — '+LEVELS[curLevel].name+' 조건 회상 테스트';
+}
+document.getElementById('recall-'+mode).value='';
+goTo(mode==='normal' ? 4 : 8);
+}
+function submitRecall(mode){
+var text=document.getElementById('recall-'+mode).value;
+var items = mode==='normal' ? curItems_normal : curItems_impaired;
+var answers = text.split(/[,\n、，]/).map(function(s){return s.trim();}).filter(Boolean);
+var hitNames=[];
+items.forEach(function(it){
+var found=answers.some(function(a){ return a.indexOf(it.name)!==-1 || it.name.indexOf(a)!==-1; });
+if(found) hitNames.push(it.name);
+});
+recallResult[mode]={score:hitNames.length, items:items, hitNames:hitNames};
+if(mode==='normal'){
+goTo(5); // 저하 단계 선택으로 이동
+} else {
+showResults();
+goTo(9);
+}
+}
+
+/* ===== STEP 2: 저하 레벨 선택 ===== */
+function selectLevel(n){
+curLevel=n;
+[1,2,3].forEach(function(i){
+document.getElementById('lcard-'+i).className='level-card'+(i===n?' sel-'+i:'');
+});
+var db=document.getElementById('level-desc-box');
+db.style.display='block';
+document.getElementById('level-desc-text').textContent=LEVELS[n].desc;
+var nb=document.getElementById('level-next-btn');
+nb.disabled=false; nb.style.opacity='1';
+}
+
+/* ===== 결과 비교 ===== */
+function showResults(){
+var nr=recallResult.normal, ir=recallResult.impaired;
+document.getElementById('score-normal').textContent=nr.score+' / '+nr.items.length;
+document.getElementById('score-impaired').textContent=ir.score+' / '+ir.items.length;
+document.getElementById('score-impaired-label').textContent=LEVELS[curLevel].name+' 조건';
+document.getElementById('score-impaired-sub').textContent='항목 '+ir.items.length+'개 · 암기 '+LEVELS[curLevel].memoSec+'초 · 방해 '+LEVELS[curLevel].distractCount+'문제';
+document.getElementById('tags-impaired-title').textContent=LEVELS[curLevel].name+' 조건에서 맞힌 항목';
+
+var tn=document.getElementById('tags-normal');
+tn.innerHTML='';
+nr.items.forEach(function(it){
+var hit = nr.hitNames.indexOf(it.name)!==-1;
+var s=document.createElement('span');
+s.className='rtag '+(hit?'hit':'miss');
+s.textContent=(hit?'✓ ':'✗ ')+it.name;
+tn.appendChild(s);
+});
+var ti=document.getElementById('tags-impaired');
+ti.innerHTML='';
+ir.items.forEach(function(it){
+var hit = ir.hitNames.indexOf(it.name)!==-1;
+var s=document.createElement('span');
+s.className='rtag '+(hit?'hit':'miss');
+s.textContent=(hit?'✓ ':'✗ ')+it.name;
+ti.appendChild(s);
+});
+}
+
+/* ===== 전체 초기화 ===== */
+function restartAll(){
+curLevel=0;
+recallResult={normal:{score:0,items:[]}, impaired:{score:0,items:[]}};
+distractState={normal:{idx:0,total:3,correct:0,a:0,b:0}, impaired:{idx:0,total:5,correct:0,a:0,b:0}};
+if(memoTimerID_normal){clearInterval(memoTimerID_normal);memoTimerID_normal=null;}
+if(memoTimerID_impaired){clearInterval(memoTimerID_impaired);memoTimerID_impaired=null;}
+var db=document.getElementById('level-desc-box'); db.style.display='none';
+[1,2,3].forEach(function(i){document.getElementById('lcard-'+i).className='level-card';});
+var nb=document.getElementById('level-next-btn'); nb.disabled=true; nb.style.opacity='.4';
+goTo(0);
+}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+</script>
+</body>
+</html>
